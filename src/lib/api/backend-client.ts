@@ -5,7 +5,8 @@
 
 import type { AirData } from '../types/air-quality';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+// Default to same-origin when VITE_BACKEND_URL is not set (works on Vercel)
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? '';
 
 export class BackendClient {
   /**
