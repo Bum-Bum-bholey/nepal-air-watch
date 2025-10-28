@@ -1,9 +1,11 @@
 /**
  * Backend API Client
  * Connects frontend to the Express backend server
+ * Falls back to direct Open-Meteo API if backend is unavailable
  */
 
 import type { AirData } from '../types/air-quality';
+import { OpenMeteoProvider } from '../providers/openmeteo-provider';
 
 // Default to same-origin when VITE_BACKEND_URL is not set (works on Vercel)
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? '';
@@ -34,7 +36,10 @@ export class BackendClient {
       return data;
     } catch (error) {
       console.error(`Error fetching data from backend for ${params.city}:`, error);
-      return null;
+      console.log('Falling back to direct Open-Meteo API...');
+      
+      // Try Open-Meteo as fallback
+      return await OpenMeteoProvider.getAirQuality(params);
     }
   }
   
@@ -61,11 +66,14 @@ export class BackendClient {
         // Data is already in object format
         return data;
       }
+      throw new Error('Backend request failed');
     } catch (error) {
       console.error('Error fetching batch data from backend:', error);
+      console.log('Falling back to direct Open-Meteo API...');
+      
+      // Try Open-Meteo as fallback
+      return await OpenMeteoProvider.getBatchAirQuality(locations);
     }
-    
-    return results;
   }
 }
 
